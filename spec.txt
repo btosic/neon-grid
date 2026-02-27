@@ -1,0 +1,419 @@
+You are building a full-stack multiplayer turn-based cyberpunk card game.
+
+Tech stack:
+
+Backend:
+
+TypeScript
+
+NestJS
+
+Postgres
+
+WebSockets (Nest Gateway)
+
+JWT Authentication
+
+Event-sourced game aggregate
+
+Jest for testing
+
+Frontend:
+
+React
+
+Vite
+
+TypeScript
+
+Zustand (state management)
+
+Native WebSocket API
+
+Minimal styling (no heavy UI frameworks)
+
+Project structure:
+Single monorepo with:
+
+/neon-grid
+  /backend
+  /frontend
+
+Use npm workspaces.
+
+🎮 GAME OVERVIEW
+
+2-player online turn-based card duel.
+
+Features:
+
+User registration & login (JWT)
+
+Create game
+
+Join game
+
+Real-time gameplay via WebSocket
+
+Server-authoritative validation
+
+Deterministic reducer
+
+Event sourcing (Postgres)
+
+Replay endpoint
+
+Hidden hand information
+
+Unit tests
+
+Docker support
+
+Runs locally with single command
+
+👤 USERS & AUTH
+
+Backend must include:
+
+User entity
+
+Registration endpoint
+
+Login endpoint
+
+Password hashing (bcrypt)
+
+JWT authentication
+
+Auth guard for REST and WebSocket
+
+Tables:
+
+users
+
+id (uuid)
+
+email (unique)
+
+password_hash
+
+created_at
+
+WebSocket must validate JWT on connection.
+
+🃏 CARD SET (STRICTLY ONLY THESE 6)
+
+Units:
+
+Street Samurai
+Cost: 1
+Attack: 2
+Health: 1
+
+Corporate Guard
+Cost: 1
+Attack: 1
+Health: 3
+
+Sniper
+Cost: 2
+Attack: 2
+Health: 1
+On Play → Deal 1 damage to target enemy unit
+
+Kamikaze Drone
+Cost: 2
+Attack: 3
+Health: 1
+On Death → Deal 2 damage to enemy player
+
+Events:
+
+EMP Blast
+Cost: 1
+Deal 2 damage to target unit
+
+Overclock
+Cost: 1
+Target unit gains +2 attack this turn
+
+No additional cards.
+
+📦 DECK
+
+Each player has fixed deck:
+
+2x Street Samurai
+
+2x Corporate Guard
+
+2x Sniper
+
+2x Kamikaze Drone
+
+1x EMP Blast
+
+1x Overclock
+
+Deck is shuffled at game creation only.
+
+No deck builder.
+
+🧠 GAME RULES
+
+Players start with 20 HP
+
+Draw 3 cards initially
+
+Each turn:
+
+Draw 1 card
+
+Gain 2 Action Points
+
+Spend AP to play cards
+
+Units attack once per turn
+
+End turn manually
+
+Units can attack:
+
+Enemy unit
+
+Enemy player
+
+Health ≤ 0 → death
+
+Player HP ≤ 0 → game ends
+
+Overclock buff expires at end of turn
+
+No stack system.
+All effects resolve immediately.
+
+🏗 BACKEND ARCHITECTURE
+
+Use clean architecture structure:
+
+backend/src/modules/games/
+  domain/
+    game.aggregate.ts
+    game.reducer.ts
+    commands.ts
+    events.ts
+  application/
+    game.service.ts
+  infrastructure/
+    game.repository.ts
+    event-store.repository.ts
+  ws/
+    game.gateway.ts
+
+Use:
+
+Command → Validate → Emit Event → Reduce
+
+Reducer must be pure.
+
+Randomness allowed ONLY when shuffling deck.
+
+🗄 DATABASE
+
+Tables:
+
+users
+games
+game_events
+ratings
+
+game_events:
+
+id uuid
+
+game_id uuid
+
+turn_number int
+
+event_type varchar
+
+payload jsonb
+
+created_at timestamp
+
+No ORM magic for domain logic.
+Use Prisma or TypeORM only for persistence.
+
+🌐 WEBSOCKET
+
+Room per game:
+
+game:{gameId}
+
+On each valid command:
+
+Persist event
+
+Rebuild state
+
+Project state for each user (hide opponent hand)
+
+Broadcast to room
+
+JWT must be validated during connection handshake.
+
+🔁 REPLAY
+
+GET /games/:id/replay
+
+Returns ordered events.
+
+Game must be reconstructible purely from event stream.
+
+🧪 TESTS
+
+Backend must include:
+
+Reducer unit tests
+
+Test:
+
+Sniper trigger
+
+Kamikaze death trigger
+
+Overclock expiration
+
+Test replay reconstruction
+
+Tests must pass with:
+
+npm run test
+🎨 FRONTEND REQUIREMENTS
+
+Frontend must include:
+
+Pages:
+
+Register
+
+Login
+
+Dashboard (list games + create game)
+
+Game Board
+
+Game board must show:
+
+Player HP
+
+Opponent HP
+
+Player hand
+
+Player board
+
+Opponent board
+
+Action buttons
+
+End turn button
+
+Frontend must:
+
+Store JWT
+
+Attach JWT to REST requests
+
+Send JWT when opening WebSocket
+
+Update state from server events
+
+Handle projected state (hidden opponent hand)
+
+Minimal CSS only.
+No heavy UI library.
+
+🐳 DOCKER
+
+Provide:
+
+docker-compose.yml
+
+Postgres service
+
+Backend service
+
+Frontend service
+
+Project must start with:
+
+docker-compose up --build
+⚙️ INSTALLATION & RUNNING
+
+The agent must:
+
+Initialize backend and frontend projects
+
+Install all dependencies
+
+Setup database connection
+
+Run migrations
+
+Run tests
+
+Start backend
+
+Start frontend
+
+Provide exact commands:
+
+npm install
+npm run dev
+npm run test
+
+Everything must run locally without manual fixes.
+
+🚫 NON-GOALS
+
+Do NOT implement:
+
+AI opponents
+
+Deck builder
+
+Animations
+
+Microservices
+
+Caching
+
+Kubernetes
+
+Advanced matchmaking
+
+ELO ranking (optional only if trivial)
+
+🎯 QUALITY
+
+Strict TypeScript
+
+No any
+
+Proper DTO validation
+
+Clean folder structure
+
+Comments explaining architectural decisions
+
+Clear README with setup instructions
+
+Generate the full project structure and all required code.
+
+Ensure it compiles, tests pass, and project runs.
+
+Do not skip files.
+Do not leave TODO placeholders.
+
+Focus on correctness, simplicity, and architectural clarity.
