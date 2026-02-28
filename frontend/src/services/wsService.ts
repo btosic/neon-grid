@@ -9,11 +9,22 @@ class WsService {
   private socket: WebSocket | null = null;
   private onStateUpdate: MessageHandler | null = null;
   private onError: ErrorHandler | null = null;
+  private messageQueue: string[] = [];
 
   connect(token: string): void {
-    if (this.socket?.readyState === WebSocket.OPEN) return;
+    if (
+      this.socket?.readyState === WebSocket.OPEN ||
+      this.socket?.readyState === WebSocket.CONNECTING
+    ) return;
 
     this.socket = new WebSocket(`${WS_URL}?token=${token}`);
+
+    this.socket.onopen = () => {
+      for (const msg of this.messageQueue) {
+        this.socket!.send(msg);
+      }
+      this.messageQueue = [];
+    };
 
     this.socket.onmessage = (event: MessageEvent<string>) => {
       const msg = JSON.parse(event.data) as { event: string; data: unknown };
@@ -31,6 +42,7 @@ class WsService {
   }
 
   disconnect(): void {
+    this.messageQueue = [];
     this.socket?.close();
     this.socket = null;
   }
@@ -60,8 +72,11 @@ class WsService {
   }
 
   private send(event: string, data: unknown): void {
+    const serialized = JSON.stringify({ event, data });
     if (this.socket?.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify({ event, data }));
+      this.socket.send(serialized);
+    } else if (this.socket?.readyState === WebSocket.CONNECTING) {
+      this.messageQueue.push(serialized);
     }
   }
 }
