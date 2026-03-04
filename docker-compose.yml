@@ -1,18 +1,18 @@
-version: '3.9'
+version: "3.9"
 
 services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: neon
-      POSTGRES_PASSWORD: neon
-      POSTGRES_DB: neon_grid
+      POSTGRES_USER: neon_grid
+      POSTGRES_PASSWORD: neon_grid
+      POSTGRES_DB: neon_grid_claude
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U neon -d neon_grid']
+      test: ["CMD-SHELL", "pg_isready -U neon_grid -d neon_grid_claude"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -25,11 +25,11 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://neon:neon@postgres:5432/neon_grid
+      DATABASE_URL: postgresql://neon_grid:neon_grid@localhost:5432/neon_grid_claude
       JWT_SECRET: super-secret-jwt-key-change-in-prod
       PORT: 3001
     ports:
-      - '3001:3001'
+      - "3001:3001"
 
   frontend:
     build:
@@ -38,7 +38,7 @@ services:
     depends_on:
       - backend
     ports:
-      - '5173:80'
+      - "5173:80"
 
 volumes:
   pgdata:
