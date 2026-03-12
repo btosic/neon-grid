@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => {
 
   const port = parseInt(env.VITE_PORT ?? '5173', 10);
   const backendUrl = env.VITE_BACKEND_URL ?? 'http://localhost:3001';
-
+  const host = env.VITE_HOST_DOMAIN ?? 'localhost';
   return {
     plugins: [react()],
     server: {
@@ -18,9 +18,7 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
         },
       },
-      allowedHosts: [
-        env.VITE_HOST_DOMAIN
-      ]
+      allowedHosts: [host]
     },
   };
 });
