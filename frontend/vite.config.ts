@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => {
         },
       },
       allowedHosts: [
-        'frontend-production-24a8.up.railway.app'
+        env.VITE_HOST_DOMAIN
       ]
     },
   };
