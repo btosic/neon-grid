@@ -42,7 +42,7 @@ function applyDamageToUnit(
   damage: number,
   ownerPlayerId: string,
   opponentPlayerId: string,
-  hpDeltas: Record<string, number>,
+  hpDeltas: Record<string, number>
 ): BoardUnit | null {
   const newHealth = unit.currentHealth - damage;
   if (newHealth <= 0) {
@@ -62,7 +62,7 @@ function applyDamageToUnit(
 function processDeaths(
   board: BoardUnit[],
   ownerPlayerId: string,
-  opponentPlayerId: string,
+  opponentPlayerId: string
 ): [BoardUnit[], Record<string, number>] {
   const hpDeltas: Record<string, number> = {};
   const survivors = board.filter((unit) => {
@@ -85,7 +85,7 @@ function processDeaths(
  */
 export function gameReducer(
   state: GameState,
-  event: { eventType: GameEventType; payload: unknown },
+  event: { eventType: GameEventType; payload: unknown }
 ): GameState {
   switch (event.eventType) {
     // ── GAME_CREATED ──────────────────────────────────────────────────────────
@@ -186,7 +186,12 @@ export function gameReducer(
           const hpDeltas: Record<string, number> = {};
           opponentBoard = opponentBoard.map((u) => {
             if (u.instanceId !== p.targetInstanceId) return u;
-            return applyDamageToUnit(u, 1, opponentId, p.playerId, hpDeltas) ?? { ...u, currentHealth: 0 };
+            return (
+              applyDamageToUnit(u, 1, opponentId, p.playerId, hpDeltas) ?? {
+                ...u,
+                currentHealth: 0,
+              }
+            );
           });
           // Remove dead units and apply Kamikaze Drone triggers
           const [survived, deathDeltas] = processDeaths(opponentBoard, opponentId, p.playerId);
@@ -204,14 +209,26 @@ export function gameReducer(
 
           const pIdx = playerBoard.findIndex((u) => u.instanceId === p.targetInstanceId);
           if (pIdx >= 0) {
-            const updated = applyDamageToUnit(playerBoard[pIdx], 2, p.playerId, opponentId, hpDeltas);
+            const updated = applyDamageToUnit(
+              playerBoard[pIdx],
+              2,
+              p.playerId,
+              opponentId,
+              hpDeltas
+            );
             playerBoard = updated
               ? playerBoard.map((u, i) => (i === pIdx ? updated : u))
               : playerBoard.filter((_, i) => i !== pIdx);
           } else {
             const oIdx = opponentBoard.findIndex((u) => u.instanceId === p.targetInstanceId);
             if (oIdx >= 0) {
-              const updated = applyDamageToUnit(opponentBoard[oIdx], 2, opponentId, p.playerId, hpDeltas);
+              const updated = applyDamageToUnit(
+                opponentBoard[oIdx],
+                2,
+                opponentId,
+                p.playerId,
+                hpDeltas
+              );
               opponentBoard = updated
                 ? opponentBoard.map((u, i) => (i === oIdx ? updated : u))
                 : opponentBoard.filter((_, i) => i !== oIdx);
@@ -235,13 +252,13 @@ export function gameReducer(
           const pIdx = playerBoard.findIndex((u) => u.instanceId === p.targetInstanceId);
           if (pIdx >= 0) {
             playerBoard = playerBoard.map((u, i) =>
-              i === pIdx ? { ...u, currentAttack: u.currentAttack + 2, overclocked: true } : u,
+              i === pIdx ? { ...u, currentAttack: u.currentAttack + 2, overclocked: true } : u
             );
           } else {
             const oIdx = opponentBoard.findIndex((u) => u.instanceId === p.targetInstanceId);
             if (oIdx >= 0) {
               opponentBoard = opponentBoard.map((u, i) =>
-                i === oIdx ? { ...u, currentAttack: u.currentAttack + 2, overclocked: true } : u,
+                i === oIdx ? { ...u, currentAttack: u.currentAttack + 2, overclocked: true } : u
               );
             }
           }
@@ -290,7 +307,7 @@ export function gameReducer(
           attackerUnit.currentAttack,
           opponentId,
           p.attackerPlayerId,
-          hpDeltas,
+          hpDeltas
         );
         opponentBoard = updatedTarget
           ? opponentBoard.map((u) => (u.instanceId === p.targetId ? updatedTarget : u))
@@ -302,7 +319,7 @@ export function gameReducer(
           targetUnit.currentAttack,
           p.attackerPlayerId,
           opponentId,
-          hpDeltas,
+          hpDeltas
         );
         attackerBoard = updatedAttacker
           ? attackerBoard.map((u) => (u.instanceId === p.attackerInstanceId ? updatedAttacker : u))
@@ -311,7 +328,7 @@ export function gameReducer(
 
       // Mark the unit as having attacked (it may have survived)
       attackerBoard = attackerBoard.map((u) =>
-        u.instanceId === p.attackerInstanceId ? { ...u, hasAttacked: true } : u,
+        u.instanceId === p.attackerInstanceId ? { ...u, hasAttacked: true } : u
       );
 
       // Clean up any additional units at zero health (shouldn't happen but safety net)
@@ -345,7 +362,7 @@ export function gameReducer(
 
       // Strip Overclock buffs from ALL units on the ending player's board
       const cleanedBoard: BoardUnit[] = endingPlayer.board.map((u) =>
-        u.overclocked ? { ...u, currentAttack: u.currentAttack - 2, overclocked: false } : u,
+        u.overclocked ? { ...u, currentAttack: u.currentAttack - 2, overclocked: false } : u
       );
 
       // Reset hasAttacked for next player's units

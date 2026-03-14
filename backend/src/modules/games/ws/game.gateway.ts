@@ -60,7 +60,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(
     private readonly gameService: GameService,
-    private readonly jwtService: JwtService,
+    private readonly jwtService: JwtService
   ) {}
 
   // ─── Connection lifecycle ─────────────────────────────────────────────────
@@ -93,7 +93,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('join_game')
   async handleJoinGame(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: JoinGameData,
+    @MessageBody() data: JoinGameData
   ): Promise<void> {
     if (!client.userId) {
       this.sendError(client, 'Unauthorized');
@@ -109,7 +109,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // Rebuild and send current state on (re)connect
     const state = await this.gameService.rebuildState(data.gameId);
-    if (state && (state.playerOrder[0] === client.userId || state.playerOrder[1] === client.userId)) {
+    if (
+      state &&
+      (state.playerOrder[0] === client.userId || state.playerOrder[1] === client.userId)
+    ) {
       const projected = this.gameService.projectState(state, client.userId);
       client.send(JSON.stringify({ event: 'game_state', data: projected }));
     }
@@ -118,7 +121,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('play_card')
   async handlePlayCard(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: PlayCardData,
+    @MessageBody() data: PlayCardData
   ): Promise<void> {
     if (!client.userId) return;
 
@@ -136,7 +139,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('attack')
   async handleAttack(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: AttackData,
+    @MessageBody() data: AttackData
   ): Promise<void> {
     if (!client.userId) return;
 
@@ -155,7 +158,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('end_turn')
   async handleEndTurn(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: EndTurnData,
+    @MessageBody() data: EndTurnData
   ): Promise<void> {
     if (!client.userId) return;
 
@@ -181,7 +184,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   /** Broadcast projected state to every client in the game room */
-  private broadcastState(gameId: string, state: Parameters<typeof this.gameService.projectState>[0]): void {
+  private broadcastState(
+    gameId: string,
+    state: Parameters<typeof this.gameService.projectState>[0]
+  ): void {
     const room = this.rooms.get(gameId);
     if (!room) return;
 

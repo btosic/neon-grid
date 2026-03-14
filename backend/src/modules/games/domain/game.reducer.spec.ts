@@ -19,7 +19,11 @@ function makeInstance(instanceId: string, cardId: CardInstance['cardId']): CardI
   return { instanceId, cardId };
 }
 
-function makeUnit(instanceId: string, cardId: BoardUnit['cardId'], overrides: Partial<BoardUnit> = {}): BoardUnit {
+function makeUnit(
+  instanceId: string,
+  cardId: BoardUnit['cardId'],
+  overrides: Partial<BoardUnit> = {}
+): BoardUnit {
   const defaults: BoardUnit = {
     instanceId,
     cardId,
@@ -71,7 +75,11 @@ function buildActiveState(): GameState {
 
   state = gameReducer(state, {
     eventType: 'GAME_STARTED',
-    payload: { player1Deck: p1Deck, player2Deck: p2Deck, firstPlayerId: P1 } satisfies GameStartedPayload,
+    payload: {
+      player1Deck: p1Deck,
+      player2Deck: p2Deck,
+      firstPlayerId: P1,
+    } satisfies GameStartedPayload,
   });
 
   return state;
@@ -154,12 +162,20 @@ describe('Game Reducer', () => {
       const sniperCard = makeInstance('sniper-2', 'sniper');
       state = {
         ...state,
-        players: { ...state.players, [P1]: { ...state.players[P1], hand: [sniperCard], actionPoints: 3 } },
+        players: {
+          ...state.players,
+          [P1]: { ...state.players[P1], hand: [sniperCard], actionPoints: 3 },
+        },
       };
 
       state = gameReducer(state, {
         eventType: 'CARD_PLAYED',
-        payload: { playerId: P1, cardInstanceId: 'sniper-2', cardId: 'sniper', targetInstanceId: 'weak-1' } satisfies CardPlayedPayload,
+        payload: {
+          playerId: P1,
+          cardInstanceId: 'sniper-2',
+          cardId: 'sniper',
+          targetInstanceId: 'weak-1',
+        } satisfies CardPlayedPayload,
       });
 
       expect(state.players[P2].board).toHaveLength(0);
@@ -173,7 +189,11 @@ describe('Game Reducer', () => {
       let state = buildActiveState();
 
       const drone = makeUnit('drone-1', 'kamikaze-drone', { currentHealth: 1, currentAttack: 3 });
-      const attacker = makeUnit('samurai-1', 'street-samurai', { currentHealth: 2, currentAttack: 2, hasAttacked: false });
+      const attacker = makeUnit('samurai-1', 'street-samurai', {
+        currentHealth: 2,
+        currentAttack: 2,
+        hasAttacked: false,
+      });
 
       state = {
         ...state,
@@ -216,7 +236,12 @@ describe('Game Reducer', () => {
 
       state = gameReducer(state, {
         eventType: 'CARD_PLAYED',
-        payload: { playerId: P1, cardInstanceId: 'emp-1', cardId: 'emp-blast', targetInstanceId: 'drone-2' } satisfies CardPlayedPayload,
+        payload: {
+          playerId: P1,
+          cardInstanceId: 'emp-1',
+          cardId: 'emp-blast',
+          targetInstanceId: 'drone-2',
+        } satisfies CardPlayedPayload,
       });
 
       // Drone (owned by P2) dies → P1 (enemy of P2) takes 2 damage
@@ -244,7 +269,12 @@ describe('Game Reducer', () => {
 
       state = gameReducer(state, {
         eventType: 'CARD_PLAYED',
-        payload: { playerId: P1, cardInstanceId: 'oc-1', cardId: 'overclock', targetInstanceId: 's1' } satisfies CardPlayedPayload,
+        payload: {
+          playerId: P1,
+          cardInstanceId: 'oc-1',
+          cardId: 'overclock',
+          targetInstanceId: 's1',
+        } satisfies CardPlayedPayload,
       });
 
       expect(state.players[P1].board[0].currentAttack).toBe(4); // 2 + 2
@@ -320,7 +350,10 @@ describe('Game Reducer', () => {
 
   describe('Replay reconstruction', () => {
     it('reconstructs state deterministically by replaying events', () => {
-      const events: Array<{ eventType: Parameters<typeof gameReducer>[1]['eventType']; payload: unknown }> = [
+      const events: Array<{
+        eventType: Parameters<typeof gameReducer>[1]['eventType'];
+        payload: unknown;
+      }> = [
         {
           eventType: 'GAME_CREATED',
           payload: { gameId: 'replay-game', player1Id: P1 } satisfies GameCreatedPayload,
@@ -332,8 +365,12 @@ describe('Game Reducer', () => {
         {
           eventType: 'GAME_STARTED',
           payload: {
-            player1Deck: Array.from({ length: 10 }, (_, i) => makeInstance(`p1-${i}`, 'street-samurai')),
-            player2Deck: Array.from({ length: 10 }, (_, i) => makeInstance(`p2-${i}`, 'corporate-guard')),
+            player1Deck: Array.from({ length: 10 }, (_, i) =>
+              makeInstance(`p1-${i}`, 'street-samurai')
+            ),
+            player2Deck: Array.from({ length: 10 }, (_, i) =>
+              makeInstance(`p2-${i}`, 'corporate-guard')
+            ),
             firstPlayerId: P1,
           } satisfies GameStartedPayload,
         },

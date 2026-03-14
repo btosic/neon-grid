@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { GameRepository } from '../infrastructure/game.repository';
 import { EventStoreRepository } from '../infrastructure/event-store.repository';
@@ -25,7 +30,7 @@ import { gameReducer, projectGameState, EMPTY_GAME_STATE } from '../domain/game.
 export class GameService {
   constructor(
     private readonly gameRepo: GameRepository,
-    private readonly eventStore: EventStoreRepository,
+    private readonly eventStore: EventStoreRepository
   ) {}
 
   // ─── REST operations ────────────────────────────────────────────────────────
@@ -46,7 +51,8 @@ export class GameService {
   async joinGame(gameId: string, playerId: string): Promise<GameEntity> {
     const game = await this.gameRepo.findById(gameId);
     if (!game) throw new NotFoundException('Game not found');
-    if (game.status !== 'waiting') throw new BadRequestException('Game is not waiting for a player');
+    if (game.status !== 'waiting')
+      throw new BadRequestException('Game is not waiting for a player');
     if (game.player1Id === playerId) throw new ForbiddenException('You are already in this game');
 
     // Persist PLAYER_JOINED event
@@ -97,7 +103,7 @@ export class GameService {
     switch (command.type) {
       case 'PLAY_CARD': {
         const card = state.players[command.playerId].hand.find(
-          (c) => c.instanceId === command.cardInstanceId,
+          (c) => c.instanceId === command.cardInstanceId
         )!;
         eventType = 'CARD_PLAYED';
         payload = {
@@ -154,7 +160,7 @@ export class GameService {
     if (events.length === 0) return null;
     return events.reduce(
       (s, e) => gameReducer(s, { eventType: e.eventType, payload: e.payload }),
-      EMPTY_GAME_STATE,
+      EMPTY_GAME_STATE
     );
   }
 

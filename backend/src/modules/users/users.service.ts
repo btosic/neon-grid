@@ -7,7 +7,7 @@ import { UserEntity } from './entities/user.entity';
 export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
-    private readonly repo: Repository<UserEntity>,
+    private readonly repo: Repository<UserEntity>
   ) {}
 
   async create(email: string, passwordHash: string): Promise<UserEntity> {

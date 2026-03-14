@@ -7,11 +7,16 @@ import { GameEntity } from './entities/game.entity';
 export class GameRepository {
   constructor(
     @InjectRepository(GameEntity)
-    private readonly repo: Repository<GameEntity>,
+    private readonly repo: Repository<GameEntity>
   ) {}
 
   async create(player1Id: string): Promise<GameEntity> {
-    const game = this.repo.create({ player1Id, status: 'waiting', player2Id: null, winnerId: null });
+    const game = this.repo.create({
+      player1Id,
+      status: 'waiting',
+      player2Id: null,
+      winnerId: null,
+    });
     return this.repo.save(game);
   }
 

@@ -26,9 +26,13 @@ export function BoardUnitCard({ unit, isSelected, isTargetable, isOwn, onClick }
     <div className={classes} onClick={onClick} title={def.effect ?? def.name}>
       <div className="unit-name">{def.name}</div>
       <div className="unit-stats">
-        <span className="atk" title="Attack">{unit.currentAttack}</span>
+        <span className="atk" title="Attack">
+          {unit.currentAttack}
+        </span>
         <span className="sep">/</span>
-        <span className="hp" title="Health">{unit.currentHealth}</span>
+        <span className="hp" title="Health">
+          {unit.currentHealth}
+        </span>
       </div>
       {unit.overclocked && <div className="buff-tag">+2 ATK</div>}
       {unit.hasAttacked && <div className="exhausted-tag">⚡</div>}

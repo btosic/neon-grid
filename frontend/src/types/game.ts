@@ -21,12 +21,54 @@ export interface CardDef {
 }
 
 export const CARD_DEFINITIONS: Record<CardId, CardDef> = {
-  'street-samurai': { id: 'street-samurai', name: 'Street Samurai', cost: 1, type: 'unit', attack: 2, health: 1 },
-  'corporate-guard': { id: 'corporate-guard', name: 'Corporate Guard', cost: 1, type: 'unit', attack: 1, health: 3 },
-  sniper: { id: 'sniper', name: 'Sniper', cost: 2, type: 'unit', attack: 2, health: 1, effect: 'On Play: 1 dmg to target' },
-  'kamikaze-drone': { id: 'kamikaze-drone', name: 'Kamikaze Drone', cost: 2, type: 'unit', attack: 3, health: 1, effect: 'On Death: 2 dmg to enemy' },
-  'emp-blast': { id: 'emp-blast', name: 'EMP Blast', cost: 1, type: 'event', effect: 'Deal 2 dmg to target unit' },
-  overclock: { id: 'overclock', name: 'Overclock', cost: 1, type: 'event', effect: '+2 ATK to target this turn' },
+  'street-samurai': {
+    id: 'street-samurai',
+    name: 'Street Samurai',
+    cost: 1,
+    type: 'unit',
+    attack: 2,
+    health: 1,
+  },
+  'corporate-guard': {
+    id: 'corporate-guard',
+    name: 'Corporate Guard',
+    cost: 1,
+    type: 'unit',
+    attack: 1,
+    health: 3,
+  },
+  sniper: {
+    id: 'sniper',
+    name: 'Sniper',
+    cost: 2,
+    type: 'unit',
+    attack: 2,
+    health: 1,
+    effect: 'On Play: 1 dmg to target',
+  },
+  'kamikaze-drone': {
+    id: 'kamikaze-drone',
+    name: 'Kamikaze Drone',
+    cost: 2,
+    type: 'unit',
+    attack: 3,
+    health: 1,
+    effect: 'On Death: 2 dmg to enemy',
+  },
+  'emp-blast': {
+    id: 'emp-blast',
+    name: 'EMP Blast',
+    cost: 1,
+    type: 'event',
+    effect: 'Deal 2 dmg to target unit',
+  },
+  overclock: {
+    id: 'overclock',
+    name: 'Overclock',
+    cost: 1,
+    type: 'event',
+    effect: '+2 ATK to target this turn',
+  },
 };
 
 export interface CardInstance {

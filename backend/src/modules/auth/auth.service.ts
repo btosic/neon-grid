@@ -15,7 +15,7 @@ export interface AuthTokenResponse {
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
-    private readonly jwtService: JwtService,
+    private readonly jwtService: JwtService
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthTokenResponse> {

@@ -10,8 +10,17 @@ import { CARD_DEFINITIONS, BoardUnit, CardInstance } from '../types/game';
 export function GameBoard() {
   const { id: gameId } = useParams<{ id: string }>();
   const { token, userId } = useAuthStore();
-  const { currentGame, selectedHandCard, selectedAttacker, wsError, setCurrentGame, selectHandCard, selectAttacker, setWsError, clearGame } =
-    useGameStore();
+  const {
+    currentGame,
+    selectedHandCard,
+    selectedAttacker,
+    wsError,
+    setCurrentGame,
+    selectHandCard,
+    selectAttacker,
+    setWsError,
+    clearGame,
+  } = useGameStore();
   const navigate = useNavigate();
 
   // Connect WebSocket and subscribe to state updates
@@ -47,7 +56,11 @@ export function GameBoard() {
       if (CARD_DEFINITIONS[card.cardId].type === 'unit' && card.cardId !== 'sniper') {
         wsService.playCard(gameId, cardInstanceId);
         selectHandCard(null);
-      } else if (CARD_DEFINITIONS[card.cardId].type === 'event' && card.cardId !== 'emp-blast' && card.cardId !== 'overclock') {
+      } else if (
+        CARD_DEFINITIONS[card.cardId].type === 'event' &&
+        card.cardId !== 'emp-blast' &&
+        card.cardId !== 'overclock'
+      ) {
         wsService.playCard(gameId, cardInstanceId);
         selectHandCard(null);
       } else {
@@ -55,7 +68,7 @@ export function GameBoard() {
         selectHandCard(selectedHandCard === cardInstanceId ? null : cardInstanceId);
       }
     },
-    [currentGame, gameId, userId, selectedHandCard],
+    [currentGame, gameId, userId, selectedHandCard]
   );
 
   const handleBoardUnitClick = useCallback(
@@ -71,8 +84,8 @@ export function GameBoard() {
         // Validate target eligibility
         const validTarget =
           (card.cardId === 'sniper' && !isOwn) ||
-          (card.cardId === 'emp-blast') ||
-          (card.cardId === 'overclock');
+          card.cardId === 'emp-blast' ||
+          card.cardId === 'overclock';
 
         if (validTarget) {
           wsService.playCard(gameId, selectedHandCard, unit.instanceId);
@@ -95,7 +108,7 @@ export function GameBoard() {
         selectAttacker(null);
       }
     },
-    [currentGame, gameId, userId, selectedHandCard, selectedAttacker],
+    [currentGame, gameId, userId, selectedHandCard, selectedAttacker]
   );
 
   const handleAttackPlayer = useCallback(() => {
@@ -118,7 +131,9 @@ export function GameBoard() {
       <div className="loading-screen">
         <p>Connecting to game…</p>
         {wsError && <p className="form-error">{wsError}</p>}
-        <button onClick={() => navigate('/dashboard')} className="btn-ghost">Back to Dashboard</button>
+        <button onClick={() => navigate('/dashboard')} className="btn-ghost">
+          Back to Dashboard
+        </button>
       </div>
     );
   }
@@ -136,7 +151,9 @@ export function GameBoard() {
       <div className="loading-screen">
         <h2>{winner === userId ? '🏆 You Win!' : '💀 You Lost'}</h2>
         <p>Game over — {winner === userId ? 'Victory' : 'Defeat'}</p>
-        <button onClick={() => navigate('/dashboard')} className="btn-primary">Back to Dashboard</button>
+        <button onClick={() => navigate('/dashboard')} className="btn-primary">
+          Back to Dashboard
+        </button>
       </div>
     );
   }
@@ -145,8 +162,12 @@ export function GameBoard() {
     <div className="game-board">
       {/* ── Header ── */}
       <div className="game-header">
-        <button onClick={() => navigate('/dashboard')} className="btn-ghost btn-sm">← Dashboard</button>
-        <span className="turn-info">Turn {turnNumber} — {isMyTurn ? 'Your turn' : "Opponent's turn"}</span>
+        <button onClick={() => navigate('/dashboard')} className="btn-ghost btn-sm">
+          ← Dashboard
+        </button>
+        <span className="turn-info">
+          Turn {turnNumber} — {isMyTurn ? 'Your turn' : "Opponent's turn"}
+        </span>
         <span className="ap-info">AP: {myState.actionPoints}</span>
       </div>
 
@@ -159,26 +180,35 @@ export function GameBoard() {
           <span className="hp-badge">{opponentState.hp} HP</span>
           <span className="hand-count">{opponentState.handCount} cards in hand</span>
           {selectedAttacker && (
-            <button className="btn-attack-player" onClick={handleAttackPlayer} title="Attack opponent directly">
+            <button
+              className="btn-attack-player"
+              onClick={handleAttackPlayer}
+              title="Attack opponent directly"
+            >
               ⚔ Attack Player
             </button>
           )}
         </div>
         <div className="board opponent-board">
-          {opponentState.board.length === 0 && (
-            <span className="empty-board">No units</span>
-          )}
+          {opponentState.board.length === 0 && <span className="empty-board">No units</span>}
           {opponentState.board.map((unit) => (
             <BoardUnitCard
               key={unit.instanceId}
               unit={unit}
               isOwn={false}
               isSelected={false}
-              isTargetable={!!selectedAttacker || !!(selectedHandCard && (
-                currentGame.myState.hand.find((c) => c.instanceId === selectedHandCard)?.cardId === 'emp-blast' ||
-                currentGame.myState.hand.find((c) => c.instanceId === selectedHandCard)?.cardId === 'sniper' ||
-                currentGame.myState.hand.find((c) => c.instanceId === selectedHandCard)?.cardId === 'overclock'
-              ))}
+              isTargetable={
+                !!selectedAttacker ||
+                !!(
+                  selectedHandCard &&
+                  (currentGame.myState.hand.find((c) => c.instanceId === selectedHandCard)
+                    ?.cardId === 'emp-blast' ||
+                    currentGame.myState.hand.find((c) => c.instanceId === selectedHandCard)
+                      ?.cardId === 'sniper' ||
+                    currentGame.myState.hand.find((c) => c.instanceId === selectedHandCard)
+                      ?.cardId === 'overclock')
+                )
+              }
               onClick={() => handleBoardUnitClick(unit, false)}
             />
           ))}
@@ -193,19 +223,22 @@ export function GameBoard() {
       {/* ── Player area ── */}
       <div className="player-area my-area">
         <div className="board my-board">
-          {myState.board.length === 0 && (
-            <span className="empty-board">No units</span>
-          )}
+          {myState.board.length === 0 && <span className="empty-board">No units</span>}
           {myState.board.map((unit) => (
             <BoardUnitCard
               key={unit.instanceId}
               unit={unit}
               isOwn={true}
               isSelected={selectedAttacker === unit.instanceId}
-              isTargetable={!!(selectedHandCard && (
-                currentGame.myState.hand.find((c) => c.instanceId === selectedHandCard)?.cardId === 'emp-blast' ||
-                currentGame.myState.hand.find((c) => c.instanceId === selectedHandCard)?.cardId === 'overclock'
-              ))}
+              isTargetable={
+                !!(
+                  selectedHandCard &&
+                  (currentGame.myState.hand.find((c) => c.instanceId === selectedHandCard)
+                    ?.cardId === 'emp-blast' ||
+                    currentGame.myState.hand.find((c) => c.instanceId === selectedHandCard)
+                      ?.cardId === 'overclock')
+                )
+              }
               onClick={() => handleBoardUnitClick(unit, true)}
             />
           ))}
@@ -245,15 +278,17 @@ export function GameBoard() {
             <span>
               Select a target for{' '}
               <strong>
-                {CARD_DEFINITIONS[currentGame.myState.hand.find((c) => c.instanceId === selectedHandCard)!.cardId].name}
-              </strong>
-              {' '}or click the card again to deselect
+                {
+                  CARD_DEFINITIONS[
+                    currentGame.myState.hand.find((c) => c.instanceId === selectedHandCard)!.cardId
+                  ].name
+                }
+              </strong>{' '}
+              or click the card again to deselect
             </span>
           )}
           {selectedAttacker && (
-            <span>
-              Select an enemy unit to attack, or click "Attack Player" above
-            </span>
+            <span>Select an enemy unit to attack, or click "Attack Player" above</span>
           )}
         </div>
       )}

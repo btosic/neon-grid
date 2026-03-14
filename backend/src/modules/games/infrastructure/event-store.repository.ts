@@ -8,14 +8,14 @@ import { GameEventType, GameEventPayload } from '../domain/events';
 export class EventStoreRepository {
   constructor(
     @InjectRepository(GameEventEntity)
-    private readonly repo: Repository<GameEventEntity>,
+    private readonly repo: Repository<GameEventEntity>
   ) {}
 
   async append(
     gameId: string,
     turnNumber: number,
     eventType: GameEventType,
-    payload: GameEventPayload,
+    payload: GameEventPayload
   ): Promise<GameEventEntity> {
     const event = this.repo.create({ gameId, turnNumber, eventType, payload });
     return this.repo.save(event);

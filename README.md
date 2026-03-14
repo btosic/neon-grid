@@ -19,22 +19,26 @@ docker-compose up --build
 **Prerequisites:** Node.js 20+, PostgreSQL running locally
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
 
 2. Configure environment:
+
 ```bash
 cp backend/.env.example backend/.env
 # Edit backend/.env with your Postgres credentials
 ```
 
 3. Run dev servers (both backend + frontend):
+
 ```bash
 npm run dev
 ```
 
 4. Run tests:
+
 ```bash
 npm run test
 ```
@@ -71,14 +75,14 @@ neon-grid/
 
 ### Cards
 
-| Card | Cost | ATK | HP | Effect |
-|------|------|-----|----|--------|
-| Street Samurai | 1 | 2 | 1 | — |
-| Corporate Guard | 1 | 1 | 3 | — |
-| Sniper | 2 | 2 | 1 | On Play: deal 1 damage to target enemy unit |
-| Kamikaze Drone | 2 | 3 | 1 | On Death: deal 2 damage to enemy player |
-| EMP Blast | 1 | — | — | Deal 2 damage to target unit |
-| Overclock | 1 | — | — | Give target unit +2 ATK this turn |
+| Card            | Cost | ATK | HP  | Effect                                      |
+| --------------- | ---- | --- | --- | ------------------------------------------- |
+| Street Samurai  | 1    | 2   | 1   | —                                           |
+| Corporate Guard | 1    | 1   | 3   | —                                           |
+| Sniper          | 2    | 2   | 1   | On Play: deal 1 damage to target enemy unit |
+| Kamikaze Drone  | 2    | 3   | 1   | On Death: deal 2 damage to enemy player     |
+| EMP Blast       | 1    | —   | —   | Deal 2 damage to target unit                |
+| Overclock       | 1    | —   | —   | Give target unit +2 ATK this turn           |
 
 ## API
 
@@ -96,11 +100,13 @@ neon-grid/
 Connect: `ws://localhost:3001?token=<jwt>`
 
 Send events:
+
 - `join_game` → `{ gameId }`
 - `play_card` → `{ gameId, cardInstanceId, targetInstanceId? }`
 - `attack` → `{ gameId, attackerInstanceId, targetId, targetType }`
 - `end_turn` → `{ gameId }`
 
 Receive events:
+
 - `game_state` → projected `GameState` (opponent hand is hidden)
 - `error` → `{ message }`

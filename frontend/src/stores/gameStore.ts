@@ -30,5 +30,6 @@ export const useGameStore = create<GameStore>((set) => ({
   selectHandCard: (instanceId) => set({ selectedHandCard: instanceId, selectedAttacker: null }),
   selectAttacker: (instanceId) => set({ selectedAttacker: instanceId, selectedHandCard: null }),
   setWsError: (msg) => set({ wsError: msg }),
-  clearGame: () => set({ currentGame: null, selectedHandCard: null, selectedAttacker: null, wsError: null }),
+  clearGame: () =>
+    set({ currentGame: null, selectedHandCard: null, selectedAttacker: null, wsError: null }),
 }));

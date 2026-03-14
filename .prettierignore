@@ -1,0 +1,25 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+build
+out
+.next
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Generated / cache
+*.min.js
+coverage
+.nyc_output
+.cache
+.nest
+
+# Logs and env
+*.log
+.env
+.env.*

@@ -18,6 +18,6 @@ export const useAuthStore = create<AuthState>()(
       login: (token, userId, email) => set({ token, userId, email }),
       logout: () => set({ token: null, userId: null, email: null }),
     }),
-    { name: 'neon-grid-auth' },
-  ),
+    { name: 'neon-grid-auth' }
+  )
 );

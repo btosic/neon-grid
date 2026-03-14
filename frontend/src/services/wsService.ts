@@ -15,7 +15,8 @@ class WsService {
     if (
       this.socket?.readyState === WebSocket.OPEN ||
       this.socket?.readyState === WebSocket.CONNECTING
-    ) return;
+    )
+      return;
 
     this.socket = new WebSocket(`${WS_URL}?token=${token}`);
 
@@ -63,7 +64,12 @@ class WsService {
     this.send('play_card', { gameId, cardInstanceId, targetInstanceId });
   }
 
-  attack(gameId: string, attackerInstanceId: string, targetId: string, targetType: 'unit' | 'player'): void {
+  attack(
+    gameId: string,
+    attackerInstanceId: string,
+    targetId: string,
+    targetType: 'unit' | 'player'
+  ): void {
     this.send('attack', { gameId, attackerInstanceId, targetId, targetType });
   }
 

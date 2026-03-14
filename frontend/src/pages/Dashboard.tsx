@@ -69,7 +69,9 @@ export function Dashboard() {
         <h1 className="logo">NEON GRID</h1>
         <div className="header-right">
           <span className="user-email">{email}</span>
-          <button onClick={handleLogout} className="btn-ghost">Logout</button>
+          <button onClick={handleLogout} className="btn-ghost">
+            Logout
+          </button>
         </div>
       </header>
 
@@ -78,7 +80,9 @@ export function Dashboard() {
           <button onClick={handleCreateGame} disabled={loading} className="btn-primary">
             + New Game
           </button>
-          <button onClick={loadGames} className="btn-ghost">Refresh</button>
+          <button onClick={loadGames} className="btn-ghost">
+            Refresh
+          </button>
         </div>
 
         {error && <p className="form-error">{error}</p>}
@@ -118,10 +122,7 @@ export function Dashboard() {
                     </button>
                   )}
                   {g.status === 'active' && (
-                    <button
-                      onClick={() => navigate(`/game/${g.id}`)}
-                      className="btn-secondary"
-                    >
+                    <button onClick={() => navigate(`/game/${g.id}`)} className="btn-secondary">
                       Spectate / Rejoin
                     </button>
                   )}

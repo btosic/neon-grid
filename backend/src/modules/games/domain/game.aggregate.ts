@@ -15,10 +15,7 @@ export class GameAggregate {
   private state: GameState;
 
   constructor(events: Pick<GameEvent, 'eventType' | 'payload'>[]) {
-    this.state = events.reduce(
-      (s, e) => gameReducer(s, e),
-      EMPTY_GAME_STATE,
-    );
+    this.state = events.reduce((s, e) => gameReducer(s, e), EMPTY_GAME_STATE);
   }
 
   getState(): GameState {
@@ -62,7 +59,9 @@ export class GameAggregate {
           if (!command.targetInstanceId) {
             throw new BadRequestException('Sniper requires a target enemy unit');
           }
-          const targetExists = opponent.board.some((u) => u.instanceId === command.targetInstanceId);
+          const targetExists = opponent.board.some(
+            (u) => u.instanceId === command.targetInstanceId
+          );
           if (!targetExists) {
             throw new BadRequestException('Sniper target not found on opponent board');
           }
