@@ -2,7 +2,7 @@
   "name": "backend",
   "version": "1.0.0",
   "scripts": {
-    "dev": "nest start --watch",
+    "dev": "nest start --watch --debug",
     "build": "nest build",
     "start": "node dist/main",
     "test": "jest --forceExit"
