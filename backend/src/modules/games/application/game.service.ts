@@ -65,7 +65,7 @@ export class GameService {
     const startPayload: GameStartedPayload = {
       player1Deck: p1Deck,
       player2Deck: p2Deck,
-      firstPlayerId: game.player1Id,
+      firstPlayerId: Math.random() < 0.5 ? game.player1Id : playerId,
     };
     await this.eventStore.append(gameId, 1, 'GAME_STARTED', startPayload);
 
