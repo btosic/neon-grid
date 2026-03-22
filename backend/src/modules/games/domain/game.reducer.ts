@@ -111,7 +111,7 @@ export function gameReducer(
     // ── PLAYER_JOINED ─────────────────────────────────────────────────────────
     case 'PLAYER_JOINED': {
       const p = event.payload as PlayerJoinedPayload;
-      const [p1] = state.playerOrder;
+      const [player1Id] = state.playerOrder;
       const player2State: PlayerState = {
         id: p.player2Id,
         hp: INITIAL_HP,
@@ -123,7 +123,7 @@ export function gameReducer(
       return {
         ...state,
         players: { ...state.players, [p.player2Id]: player2State },
-        playerOrder: [p1, p.player2Id],
+        playerOrder: [player1Id, p.player2Id],
       };
     }
 
@@ -142,8 +142,18 @@ export function gameReducer(
         ...state,
         status: 'active',
         players: {
-          [p1Id]: { ...state.players[p1Id], hand: p1Hand, deck: p1Deck, actionPoints: AP_PER_TURN },
-          [p2Id]: { ...state.players[p2Id], hand: p2Hand, deck: p2Deck, actionPoints: 0 },
+          [p1Id]: {
+            ...state.players[p1Id],
+            hand: p1Hand,
+            deck: p1Deck,
+            actionPoints: p.firstPlayerId === p1Id ? AP_PER_TURN : 0,
+          },
+          [p2Id]: {
+            ...state.players[p2Id],
+            hand: p2Hand,
+            deck: p2Deck,
+            actionPoints: p.firstPlayerId === p2Id ? AP_PER_TURN : 0,
+          },
         },
         activePlayerId: p.firstPlayerId,
         turnNumber: 1,
