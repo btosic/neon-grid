@@ -35,11 +35,8 @@ export const EMPTY_GAME_STATE: GameState = {
  *
  * Returns the updated unit, or `null` if the unit died.
  */
-function applyDamageToUnit(unit: BoardUnit, damage: number): BoardUnit | null {
+function applyDamageToUnit(unit: BoardUnit, damage: number): BoardUnit {
   const newHealth = unit.currentHealth - damage;
-  if (newHealth <= 0) {
-    return null;
-  }
   return { ...unit, currentHealth: newHealth };
 }
 
@@ -217,12 +214,7 @@ function reduceCardPlayed(event: { eventType: GameEventType; payload: unknown },
     if (p.cardId === 'sniper' && p.targetInstanceId) {
       opponentBoard = opponentBoard.map((u) => {
         if (u.instanceId !== p.targetInstanceId) return u;
-        return (
-          applyDamageToUnit(u, 1) ?? {
-            ...u,
-            currentHealth: 0,
-          }
-        );
+        return applyDamageToUnit(u, 1);
       });
       // Remove dead units and apply Kamikaze Drone triggers
       const [survived, deathDeltas] = processDeaths(opponentBoard, p.playerId);
@@ -237,16 +229,12 @@ function reduceCardPlayed(event: { eventType: GameEventType; payload: unknown },
       const pIdx = playerBoard.findIndex((u) => u.instanceId === p.targetInstanceId);
       if (pIdx >= 0) {
         const updated = applyDamageToUnit(playerBoard[pIdx], 2);
-        playerBoard = updated
-          ? playerBoard.map((u, i) => (i === pIdx ? updated : u))
-          : playerBoard.filter((_, i) => i !== pIdx);
+        playerBoard = playerBoard.map((u, i) => (i === pIdx ? updated : u));
       } else {
         const oIdx = opponentBoard.findIndex((u) => u.instanceId === p.targetInstanceId);
         if (oIdx >= 0) {
           const updated = applyDamageToUnit(opponentBoard[oIdx], 2);
-          opponentBoard = updated
-            ? opponentBoard.map((u, i) => (i === oIdx ? updated : u))
-            : opponentBoard.filter((_, i) => i !== oIdx);
+          opponentBoard = opponentBoard.map((u, i) => (i === oIdx ? updated : u));
         }
       }
 
@@ -319,15 +307,13 @@ function reduceUnitAttacked(
 
     // Apply attacker's damage to defender
     const updatedTarget = applyDamageToUnit(targetUnit, attackerUnit.currentAttack);
-    opponentBoard = updatedTarget
-      ? opponentBoard.map((u) => (u.instanceId === p.targetId ? updatedTarget : u))
-      : opponentBoard.filter((u) => u.instanceId !== p.targetId);
+    opponentBoard = opponentBoard.map((u) => (u.instanceId === p.targetId ? updatedTarget : u));
 
     // Apply defender's damage to attacker
     const updatedAttacker = applyDamageToUnit(attackerUnit, targetUnit.currentAttack);
-    attackerBoard = updatedAttacker
-      ? attackerBoard.map((u) => (u.instanceId === p.attackerInstanceId ? updatedAttacker : u))
-      : attackerBoard.filter((u) => u.instanceId !== p.attackerInstanceId);
+    attackerBoard = attackerBoard.map((u) =>
+      u.instanceId === p.attackerInstanceId ? updatedAttacker : u
+    );
   }
 
   // Mark the unit as having attacked (it may have survived)
