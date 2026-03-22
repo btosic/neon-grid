@@ -40,15 +40,14 @@ export const EMPTY_GAME_STATE: GameState = {
 function applyDamageToUnit(
   unit: BoardUnit,
   damage: number,
-  ownerPlayerId: string,
-  opponentPlayerId: string,
+  unitOpponentPlayerId: string,
   hpDeltas: Record<string, number>
 ): BoardUnit | null {
   const newHealth = unit.currentHealth - damage;
   if (newHealth <= 0) {
     if (unit.cardId === 'kamikaze-drone') {
       // On Death: deal 2 damage to the enemy of whoever owns this drone
-      hpDeltas[opponentPlayerId] = (hpDeltas[opponentPlayerId] ?? 0) - 2;
+      hpDeltas[unitOpponentPlayerId] = (hpDeltas[unitOpponentPlayerId] ?? 0) - 2;
     }
     return null;
   }
@@ -232,7 +231,7 @@ function reduceCardPlayed(event: { eventType: GameEventType; payload: unknown },
       opponentBoard = opponentBoard.map((u) => {
         if (u.instanceId !== p.targetInstanceId) return u;
         return (
-          applyDamageToUnit(u, 1, opponentId, p.playerId, hpDeltas) ?? {
+          applyDamageToUnit(u, 1, p.playerId, hpDeltas) ?? {
             ...u,
             currentHealth: 0,
           }
@@ -254,20 +253,14 @@ function reduceCardPlayed(event: { eventType: GameEventType; payload: unknown },
 
       const pIdx = playerBoard.findIndex((u) => u.instanceId === p.targetInstanceId);
       if (pIdx >= 0) {
-        const updated = applyDamageToUnit(playerBoard[pIdx], 2, p.playerId, opponentId, hpDeltas);
+        const updated = applyDamageToUnit(playerBoard[pIdx], 2, opponentId, hpDeltas);
         playerBoard = updated
           ? playerBoard.map((u, i) => (i === pIdx ? updated : u))
           : playerBoard.filter((_, i) => i !== pIdx);
       } else {
         const oIdx = opponentBoard.findIndex((u) => u.instanceId === p.targetInstanceId);
         if (oIdx >= 0) {
-          const updated = applyDamageToUnit(
-            opponentBoard[oIdx],
-            2,
-            opponentId,
-            p.playerId,
-            hpDeltas
-          );
+          const updated = applyDamageToUnit(opponentBoard[oIdx], 2, p.playerId, hpDeltas);
           opponentBoard = updated
             ? opponentBoard.map((u, i) => (i === oIdx ? updated : u))
             : opponentBoard.filter((_, i) => i !== oIdx);
@@ -346,7 +339,6 @@ function reduceUnitAttacked(
     const updatedTarget = applyDamageToUnit(
       targetUnit,
       attackerUnit.currentAttack,
-      opponentId,
       p.attackerPlayerId,
       hpDeltas
     );
@@ -358,7 +350,6 @@ function reduceUnitAttacked(
     const updatedAttacker = applyDamageToUnit(
       attackerUnit,
       targetUnit.currentAttack,
-      p.attackerPlayerId,
       opponentId,
       hpDeltas
     );
