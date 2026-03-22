@@ -32,23 +32,12 @@ export const EMPTY_GAME_STATE: GameState = {
 
 /**
  * Apply damage to a board unit.
- * If it dies and is a Kamikaze Drone, accumulate the 2-damage trigger against
- * the unit's *enemy* player in `hpDeltas`.
  *
  * Returns the updated unit, or `null` if the unit died.
  */
-function applyDamageToUnit(
-  unit: BoardUnit,
-  damage: number,
-  unitOpponentPlayerId: string,
-  hpDeltas: Record<string, number>
-): BoardUnit | null {
+function applyDamageToUnit(unit: BoardUnit, damage: number): BoardUnit | null {
   const newHealth = unit.currentHealth - damage;
   if (newHealth <= 0) {
-    if (unit.cardId === 'kamikaze-drone') {
-      // On Death: deal 2 damage to the enemy of whoever owns this drone
-      hpDeltas[unitOpponentPlayerId] = (hpDeltas[unitOpponentPlayerId] ?? 0) - 2;
-    }
     return null;
   }
   return { ...unit, currentHealth: newHealth };
@@ -60,7 +49,6 @@ function applyDamageToUnit(
  */
 function processDeaths(
   board: BoardUnit[],
-  ownerPlayerId: string,
   opponentPlayerId: string
 ): [BoardUnit[], Record<string, number>] {
   const hpDeltas: Record<string, number> = {};
@@ -227,18 +215,17 @@ function reduceCardPlayed(event: { eventType: GameEventType; payload: unknown },
 
     // Sniper on-play: deal 1 damage to target enemy unit
     if (p.cardId === 'sniper' && p.targetInstanceId) {
-      const hpDeltas: Record<string, number> = {};
       opponentBoard = opponentBoard.map((u) => {
         if (u.instanceId !== p.targetInstanceId) return u;
         return (
-          applyDamageToUnit(u, 1, p.playerId, hpDeltas) ?? {
+          applyDamageToUnit(u, 1) ?? {
             ...u,
             currentHealth: 0,
           }
         );
       });
       // Remove dead units and apply Kamikaze Drone triggers
-      const [survived, deathDeltas] = processDeaths(opponentBoard, opponentId, p.playerId);
+      const [survived, deathDeltas] = processDeaths(opponentBoard, p.playerId);
       opponentBoard = survived;
       opponentHp += deathDeltas[opponentId] ?? 0;
       playerHp += deathDeltas[p.playerId] ?? 0;
@@ -247,18 +234,16 @@ function reduceCardPlayed(event: { eventType: GameEventType; payload: unknown },
     // Event card effects
     if (p.cardId === 'emp-blast' && p.targetInstanceId) {
       // Deal 2 damage to any unit
-      const hpDeltas: Record<string, number> = {};
-
       const pIdx = playerBoard.findIndex((u) => u.instanceId === p.targetInstanceId);
       if (pIdx >= 0) {
-        const updated = applyDamageToUnit(playerBoard[pIdx], 2, opponentId, hpDeltas);
+        const updated = applyDamageToUnit(playerBoard[pIdx], 2);
         playerBoard = updated
           ? playerBoard.map((u, i) => (i === pIdx ? updated : u))
           : playerBoard.filter((_, i) => i !== pIdx);
       } else {
         const oIdx = opponentBoard.findIndex((u) => u.instanceId === p.targetInstanceId);
         if (oIdx >= 0) {
-          const updated = applyDamageToUnit(opponentBoard[oIdx], 2, p.playerId, hpDeltas);
+          const updated = applyDamageToUnit(opponentBoard[oIdx], 2);
           opponentBoard = updated
             ? opponentBoard.map((u, i) => (i === oIdx ? updated : u))
             : opponentBoard.filter((_, i) => i !== oIdx);
@@ -266,13 +251,13 @@ function reduceCardPlayed(event: { eventType: GameEventType; payload: unknown },
       }
 
       // After removing dead units, run processDeaths for any that reached 0
-      const [pSurvived, pDeaths] = processDeaths(playerBoard, p.playerId, opponentId);
-      const [oSurvived, oDeaths] = processDeaths(opponentBoard, opponentId, p.playerId);
+      const [pSurvived, pDeaths] = processDeaths(playerBoard, opponentId);
+      const [oSurvived, oDeaths] = processDeaths(opponentBoard, p.playerId);
       playerBoard = pSurvived;
       opponentBoard = oSurvived;
 
       // Merge all hp deltas
-      const allDeltas = [hpDeltas, pDeaths, oDeaths];
+      const allDeltas = [pDeaths, oDeaths];
       for (const d of allDeltas) {
         playerHp += d[p.playerId] ?? 0;
         opponentHp += d[opponentId] ?? 0;
@@ -323,7 +308,6 @@ function reduceUnitAttacked(
   let opponentBoard = [...opponent.board];
   let attackerHp = attacker.hp;
   let opponentHp = opponent.hp;
-  const hpDeltas: Record<string, number> = {};
 
   if (p.targetType === 'player') {
     // Direct player attack
@@ -334,23 +318,13 @@ function reduceUnitAttacked(
     if (!targetUnit) return state;
 
     // Apply attacker's damage to defender
-    const updatedTarget = applyDamageToUnit(
-      targetUnit,
-      attackerUnit.currentAttack,
-      p.attackerPlayerId,
-      hpDeltas
-    );
+    const updatedTarget = applyDamageToUnit(targetUnit, attackerUnit.currentAttack);
     opponentBoard = updatedTarget
       ? opponentBoard.map((u) => (u.instanceId === p.targetId ? updatedTarget : u))
       : opponentBoard.filter((u) => u.instanceId !== p.targetId);
 
     // Apply defender's damage to attacker
-    const updatedAttacker = applyDamageToUnit(
-      attackerUnit,
-      targetUnit.currentAttack,
-      opponentId,
-      hpDeltas
-    );
+    const updatedAttacker = applyDamageToUnit(attackerUnit, targetUnit.currentAttack);
     attackerBoard = updatedAttacker
       ? attackerBoard.map((u) => (u.instanceId === p.attackerInstanceId ? updatedAttacker : u))
       : attackerBoard.filter((u) => u.instanceId !== p.attackerInstanceId);
@@ -362,13 +336,13 @@ function reduceUnitAttacked(
   );
 
   // Clean up any additional units at zero health (shouldn't happen but safety net)
-  const [aSurvived, aDeaths] = processDeaths(attackerBoard, p.attackerPlayerId, opponentId);
-  const [oSurvived, oDeaths] = processDeaths(opponentBoard, opponentId, p.attackerPlayerId);
+  const [aSurvived, aDeaths] = processDeaths(attackerBoard, opponentId);
+  const [oSurvived, oDeaths] = processDeaths(opponentBoard, p.attackerPlayerId);
 
   attackerBoard = aSurvived;
   opponentBoard = oSurvived;
 
-  const allDeltas = [hpDeltas, aDeaths, oDeaths];
+  const allDeltas = [aDeaths, oDeaths];
   for (const d of allDeltas) {
     attackerHp += d[p.attackerPlayerId] ?? 0;
     opponentHp += d[opponentId] ?? 0;
