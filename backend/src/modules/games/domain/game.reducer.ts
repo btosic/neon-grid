@@ -242,8 +242,6 @@ function reduceCardPlayed(event: { eventType: GameEventType; payload: unknown },
       opponentBoard = survived;
       opponentHp += deathDeltas[opponentId] ?? 0;
       playerHp += deathDeltas[p.playerId] ?? 0;
-      opponentHp += hpDeltas[opponentId] ?? 0;
-      playerHp += hpDeltas[p.playerId] ?? 0;
     }
   } else {
     // Event card effects
