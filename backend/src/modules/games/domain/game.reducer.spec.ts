@@ -394,6 +394,7 @@ describe('Game Reducer', () => {
       const projected = projectGameState(state, P1);
       expect(projected.myState.hand.length).toBeGreaterThan(0);
       expect(projected.opponentState.handCount).toBe(state.players[P2].hand.length);
+      expect((projected.opponentState as any).hand).toBeUndefined();
     });
   });
 });

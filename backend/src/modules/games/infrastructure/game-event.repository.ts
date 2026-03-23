@@ -5,7 +5,7 @@ import { GameEventEntity } from './entities/game-event.entity';
 import { GameEventType, GameEventPayload } from '../domain/events';
 
 @Injectable()
-export class EventStoreRepository {
+export class GameEventRepository {
   constructor(
     @InjectRepository(GameEventEntity)
     private readonly repo: Repository<GameEventEntity>

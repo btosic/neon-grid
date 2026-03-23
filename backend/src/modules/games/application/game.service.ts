@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { GameRepository } from '../infrastructure/game.repository';
-import { EventStoreRepository } from '../infrastructure/event-store.repository';
+import { GameEventRepository } from '../infrastructure/game-event.repository';
 import { GameEntity } from '../infrastructure/entities/game.entity';
 import { GameEventEntity } from '../infrastructure/entities/game-event.entity';
 import { GameAggregate } from '../domain/game.aggregate';
@@ -30,7 +30,7 @@ import { gameReducer, projectGameState, EMPTY_GAME_STATE } from '../domain/game.
 export class GameService {
   constructor(
     private readonly gameRepo: GameRepository,
-    private readonly eventStore: EventStoreRepository
+    private readonly gameEventRepo: GameEventRepository
   ) {}
 
   // ─── REST operations ────────────────────────────────────────────────────────
@@ -43,7 +43,7 @@ export class GameService {
     const game = await this.gameRepo.create(playerId);
 
     const payload: GameCreatedPayload = { gameId: game.id, player1Id: playerId };
-    await this.eventStore.append(game.id, 0, 'GAME_CREATED', payload);
+    await this.gameEventRepo.append(game.id, 0, 'GAME_CREATED', payload);
 
     return game;
   }
@@ -57,7 +57,7 @@ export class GameService {
 
     // Persist PLAYER_JOINED event
     const joinPayload: PlayerJoinedPayload = { player2Id: playerId };
-    await this.eventStore.append(gameId, 0, 'PLAYER_JOINED', joinPayload);
+    await this.gameEventRepo.append(gameId, 0, 'PLAYER_JOINED', joinPayload);
 
     // Shuffle both decks (only place randomness occurs) and persist GAME_STARTED
     const p1Deck = shuffleDeck(buildDeck());
@@ -67,7 +67,7 @@ export class GameService {
       player2Deck: p2Deck,
       firstPlayerId: Math.random() < 0.5 ? game.player1Id : playerId,
     };
-    await this.eventStore.append(gameId, 1, 'GAME_STARTED', startPayload);
+    await this.gameEventRepo.append(gameId, 1, 'GAME_STARTED', startPayload);
 
     await this.gameRepo.update(gameId, { player2Id: playerId, status: 'active' });
 
@@ -77,7 +77,7 @@ export class GameService {
   async getReplay(gameId: string): Promise<GameEventEntity[]> {
     const game = await this.gameRepo.findById(gameId);
     if (!game) throw new NotFoundException('Game not found');
-    return this.eventStore.findByGameId(gameId);
+    return this.gameEventRepo.findByGameId(gameId);
   }
 
   // ─── Command handling (WebSocket) ───────────────────────────────────────────
@@ -87,7 +87,7 @@ export class GameService {
    * Returns the new full game state so the gateway can project and broadcast it.
    */
   async handleCommand(command: GameCommand): Promise<GameState> {
-    const events = await this.eventStore.findByGameId(command.gameId);
+    const events = await this.gameEventRepo.findByGameId(command.gameId);
     if (events.length === 0) throw new NotFoundException('Game not found');
 
     const aggregate = new GameAggregate(events);
@@ -136,7 +136,7 @@ export class GameService {
       }
     }
 
-    await this.eventStore.append(command.gameId, turnNumber, eventType, payload);
+    await this.gameEventRepo.append(command.gameId, turnNumber, eventType, payload);
     aggregate.applyEvent({ eventType, payload });
 
     // Check win condition after every action
@@ -144,7 +144,7 @@ export class GameService {
     if (loser) {
       const winnerId = aggregate.getOpponentId(loser);
       const endPayload: GameEndedPayload = { winnerId };
-      await this.eventStore.append(command.gameId, turnNumber, 'GAME_ENDED', endPayload);
+      await this.gameEventRepo.append(command.gameId, turnNumber, 'GAME_ENDED', endPayload);
       aggregate.applyEvent({ eventType: 'GAME_ENDED', payload: endPayload });
       await this.gameRepo.update(command.gameId, { status: 'finished', winnerId });
     }
@@ -156,7 +156,7 @@ export class GameService {
 
   /** Rebuild full game state from the event store (used when a player connects/reconnects) */
   async rebuildState(gameId: string): Promise<GameState | null> {
-    const events = await this.eventStore.findByGameId(gameId);
+    const events = await this.gameEventRepo.findByGameId(gameId);
     if (events.length === 0) return null;
     return events.reduce(
       (s, e) => gameReducer(s, { eventType: e.eventType, payload: e.payload }),
