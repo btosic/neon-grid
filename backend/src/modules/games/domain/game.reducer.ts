@@ -316,12 +316,12 @@ function reduceUnitAttacked(
     );
   }
 
-  // Mark the unit as having attacked (it may have survived)
+  // Mark the unit as having attacked
   attackerBoard = attackerBoard.map((u) =>
     u.instanceId === p.attackerInstanceId ? { ...u, hasAttacked: true } : u
   );
 
-  // Clean up any additional units at zero health (shouldn't happen but safety net)
+  // Clean up any additional units at zero health
   const [aSurvived, aDeaths] = processDeaths(attackerBoard, opponentId);
   const [oSurvived, oDeaths] = processDeaths(opponentBoard, p.attackerPlayerId);
 
