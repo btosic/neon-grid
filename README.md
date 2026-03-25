@@ -1,10 +1,42 @@
-# Neon Grid — Cyberpunk Card Game
+# Neon Grid
 
-A full-stack 2-player multiplayer turn-based card game built with NestJS, React, and PostgreSQL.
+_A full-stack 2-player multiplayer turn-based card game with cyberpunk theme._
+
+## About
+
+This is a showcase project developed to display usage of the following blend of technologies:
+
+Database:
+
+Backend:
+
+- NestJS
+- Node
+- TypeScript
+- PostgreSQL
+- TypeORM
+- JWT Auth
+- Websockets (ws)
+
+Frontend:
+
+- React
+- Typescript
+- Zustand
+- Vite
+
+Testing, CI/CD and Deployment:
+
+- Jest
+- Docker
+- Github Actions
+- Railway
+
+Live demo is deployed to Railways and can be played [here](https://neon-grid.up.railway.app)
 
 ## Quick Start
 
-### Option 1: Docker (recommended)
+### Option 1: Docker
 
 ```bash
 docker-compose up --build
@@ -31,7 +63,7 @@ cp backend/.env.example backend/.env
 # Edit backend/.env with your Postgres credentials
 ```
 
-3. Run dev servers (both backend + frontend):
+3. Run (both backend + frontend) dev servers:
 
 ```bash
 npm run dev
