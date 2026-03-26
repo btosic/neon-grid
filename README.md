@@ -1,12 +1,10 @@
 # Neon Grid
 
-_A full-stack 2-player multiplayer turn-based card game with cyberpunk theme._
+*A full-stack 2-player multiplayer turn-based card game with cyberpunk theme.*
 
 ## About
 
 This is a showcase project developed to display usage of the following blend of technologies:
-
-Database:
 
 Backend:
 
@@ -42,8 +40,8 @@ Live demo is deployed to Railways and can be played [here](https://neon-grid.up.
 docker-compose up --build
 ```
 
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:3001
+- Frontend: [http://localhost:5173](http://localhost:5173)
+- Backend API: [http://localhost:3001](http://localhost:3001)
 - PostgreSQL: localhost:5432
 
 ### Option 2: Local development
@@ -56,20 +54,20 @@ docker-compose up --build
 npm install
 ```
 
-2. Configure environment:
+1. Configure environment:
 
 ```bash
 cp backend/.env.example backend/.env
 # Edit backend/.env with your Postgres credentials
 ```
 
-3. Run (both backend + frontend) dev servers:
+1. Run (both backend + frontend) dev servers:
 
 ```bash
 npm run dev
 ```
 
-4. Run tests:
+1. Run tests:
 
 ```bash
 npm run test
@@ -107,6 +105,7 @@ neon-grid/
 
 ### Cards
 
+
 | Card            | Cost | ATK | HP  | Effect                                      |
 | --------------- | ---- | --- | --- | ------------------------------------------- |
 | Street Samurai  | 1    | 2   | 1   | —                                           |
@@ -115,6 +114,7 @@ neon-grid/
 | Kamikaze Drone  | 2    | 3   | 1   | On Death: deal 2 damage to enemy player     |
 | EMP Blast       | 1    | —   | —   | Deal 2 damage to target unit                |
 | Overclock       | 1    | —   | —   | Give target unit +2 ATK this turn           |
+
 
 ## API
 
@@ -142,3 +142,4 @@ Receive events:
 
 - `game_state` → projected `GameState` (opponent hand is hidden)
 - `error` → `{ message }`
+
