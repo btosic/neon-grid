@@ -6,7 +6,7 @@ import { useGameStore } from '../stores/gameStore';
 import { GameListItem } from '../types/game';
 
 export function Dashboard() {
-  const { email, logout } = useAuthStore();
+  const { email, userId, logout } = useAuthStore();
   const { games, setGames } = useGameStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +40,10 @@ export function Dashboard() {
   }
 
   async function handleJoin(game: GameListItem) {
+    if (game.player1Id === userId) {
+      navigate(`/game/${game.id}`);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -123,7 +127,7 @@ export function Dashboard() {
                   )}
                   {g.status === 'active' && (
                     <button onClick={() => navigate(`/game/${g.id}`)} className="btn-secondary">
-                      Spectate / Rejoin
+                      Rejoin
                     </button>
                   )}
                 </td>
