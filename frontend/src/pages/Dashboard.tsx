@@ -116,7 +116,7 @@ export function Dashboard() {
                 </td>
                 <td>{new Date(g.createdAt).toLocaleString()}</td>
                 <td>
-                  {g.status === 'waiting' && (
+                  {g.status === 'waiting' && g.player2Id === null && g.player1Id !== userId && (
                     <button
                       onClick={() => handleJoin(g)}
                       disabled={loading}
@@ -125,11 +125,12 @@ export function Dashboard() {
                       Join
                     </button>
                   )}
-                  {g.status === 'active' && (
-                    <button onClick={() => navigate(`/game/${g.id}`)} className="btn-secondary">
-                      Rejoin
-                    </button>
-                  )}
+                  {(g.player1Id === userId || g.player2Id === userId) &&
+                    (g.status === 'active' || g.status === 'waiting') && (
+                      <button onClick={() => navigate(`/game/${g.id}`)} className="btn-secondary">
+                        Rejoin
+                      </button>
+                    )}
                 </td>
               </tr>
             ))}
