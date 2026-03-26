@@ -107,14 +107,26 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     this.rooms.get(data.gameId)!.add(client);
 
-    // Rebuild and send current state on (re)connect
+    // Rebuild state and decide what to send back
     const state = await this.gameService.rebuildState(data.gameId);
-    if (
-      state &&
-      (state.playerOrder[0] === client.userId || state.playerOrder[1] === client.userId)
-    ) {
-      const projected = this.gameService.projectState(state, client.userId);
-      client.send(JSON.stringify({ event: 'game_state', data: projected }));
+    if (!state) {
+      this.sendError(client, 'Game not found');
+      return;
+    }
+
+    const [p1, p2] = state.playerOrder;
+    if (client.userId !== p1 && client.userId !== p2) {
+      this.sendError(client, 'You are not a participant in this game');
+      return;
+    }
+
+    if (state.status === 'waiting') {
+      // Game hasn't started yet — tell the creator to wait
+      client.send(JSON.stringify({ event: 'waiting_for_opponent', data: { gameId: data.gameId } }));
+    } else {
+      // Game is active — broadcast projected state to every connected player in the room
+      // (covers both the reconnecting player and anyone already waiting in the room)
+      this.broadcastState(data.gameId, state);
     }
   }
 

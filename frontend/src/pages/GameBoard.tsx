@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { useGameStore } from '../stores/gameStore';
@@ -22,6 +22,7 @@ export function GameBoard() {
     clearGame,
   } = useGameStore();
   const navigate = useNavigate();
+  const [waitingForOpponent, setWaitingForOpponent] = useState(false);
 
   // Connect WebSocket and subscribe to state updates
   useEffect(() => {
@@ -29,9 +30,11 @@ export function GameBoard() {
 
     wsService.connect(token);
     wsService.onMessage((state) => {
+      setWaitingForOpponent(false);
       setCurrentGame(state);
       setWsError(null);
     });
+    wsService.onWaitingMessage(() => setWaitingForOpponent(true));
     wsService.onErrorMessage((msg) => setWsError(msg));
     wsService.joinGame(gameId);
 
@@ -129,7 +132,14 @@ export function GameBoard() {
   if (!currentGame) {
     return (
       <div className="loading-screen">
-        <p>Connecting to game…</p>
+        {waitingForOpponent ? (
+          <>
+            <p>Waiting for an opponent to join…</p>
+            <p className="loading-subtext">Share the game ID: <strong>{gameId}</strong></p>
+          </>
+        ) : (
+          <p>Connecting to game…</p>
+        )}
         {wsError && <p className="form-error">{wsError}</p>}
         <button onClick={() => navigate('/dashboard')} className="btn-ghost">
           Back to Dashboard

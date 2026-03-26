@@ -2,6 +2,7 @@ import { ProjectedGameState } from '../types/game';
 
 type MessageHandler = (state: ProjectedGameState) => void;
 type ErrorHandler = (message: string) => void;
+type WaitingHandler = () => void;
 
 const WS_URL = import.meta.env['VITE_WS_URL'] ?? 'ws://localhost:3001';
 
@@ -9,6 +10,7 @@ class WsService {
   private socket: WebSocket | null = null;
   private onStateUpdate: MessageHandler | null = null;
   private onError: ErrorHandler | null = null;
+  private onWaiting: WaitingHandler | null = null;
   private messageQueue: string[] = [];
 
   connect(token: string): void {
@@ -31,6 +33,8 @@ class WsService {
       const msg = JSON.parse(event.data) as { event: string; data: unknown };
       if (msg.event === 'game_state') {
         this.onStateUpdate?.(msg.data as ProjectedGameState);
+      } else if (msg.event === 'waiting_for_opponent') {
+        this.onWaiting?.();
       } else if (msg.event === 'error') {
         const err = msg.data as { message: string };
         this.onError?.(err.message);
@@ -54,6 +58,10 @@ class WsService {
 
   onErrorMessage(handler: ErrorHandler): void {
     this.onError = handler;
+  }
+
+  onWaitingMessage(handler: WaitingHandler): void {
+    this.onWaiting = handler;
   }
 
   joinGame(gameId: string): void {
