@@ -79,22 +79,22 @@ npm run test
 
 ```
 neon-grid/
-├── backend/               # NestJS API + WebSocket server
+├── backend/                    # NestJS API + WebSocket server
 │   └── src/modules/
-│       ├── auth/          # JWT authentication
-│       ├── users/         # User entity & service
+│       ├── auth/               # JWT authentication
+│       ├── users/              # User entity & service
 │       └── games/
-│           ├── domain/    # Pure game logic (reducer, events, commands)
-│           ├── application/  # Game service (orchestrates commands)
+│           ├── domain/         # Pure game logic (reducer, events, commands)
+│           ├── application/    # Game service (orchestrates commands)
 │           ├── infrastructure/ # TypeORM entities & repositories
-│           └── ws/        # WebSocket gateway
-└── frontend/              # React + Vite + Zustand
+│           └── ws/             # WebSocket gateway
+└── frontend/                   # React + Vite + Zustand
     └── src/
-        ├── pages/         # Register, Login, Dashboard, GameBoard
-        ├── components/    # Card, BoardUnit
-        ├── stores/        # Zustand auth & game stores
-        ├── services/      # REST API client, WebSocket service
-        └── types/         # Shared TypeScript types
+        ├── pages/              # Register, Login, Dashboard, GameBoard
+        ├── components/         # Card, BoardUnit
+        ├── stores/             # Zustand auth & game stores
+        ├── services/           # REST API client, WebSocket service
+        └── types/              # Shared TypeScript types
 ```
 
 ## Game Rules
